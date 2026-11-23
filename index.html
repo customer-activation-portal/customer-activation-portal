@@ -70,6 +70,7 @@
       font-size: 13px;
       line-height: 1.6;
       color: #64748b;
+      overflow-wrap: anywhere;
     }
 
     .footer {
@@ -82,14 +83,13 @@
 
 <body>
   <main class="login-card">
-
     <div class="logo">CA</div>
 
     <h1>Customer Activation Portal</h1>
 
     <p class="description">
       Silakan masuk menggunakan akun Google
-      yang akan didaftarkan pada portal.
+      yang terdaftar pada portal.
     </p>
 
     <div id="googleButton"></div>
@@ -101,26 +101,57 @@
     <div class="footer">
       Internal Application · Customer Activation Portal
     </div>
-
   </main>
 
   <script>
     const GOOGLE_CLIENT_ID =
       '56350678879-egqgpret0id4k671hgqsb15rnc7e147a.apps.googleusercontent.com';
 
-    function handleGoogleResponse(response) {
-      document.getElementById('status').textContent =
-        'Respons Google diterima. Verifikasi keamanan di server ' +
-        'belum diaktifkan. Akses portal belum diberikan.';
-      
-      // Token tidak disimpan dan belum dikirim ke server.
-      // Verifikasi backend akan dibuat pada tahap berikutnya.
+    const WORKER_URL =
+      'https://ca-portal-auth.wahyu-ari-kerja.workers.dev/verify';
+
+    const statusBox = document.getElementById('status');
+
+    async function handleGoogleResponse(response) {
+      statusBox.textContent =
+        'Memverifikasi identitas Google...';
+
+      try {
+        const result = await fetch(WORKER_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            idToken: response.credential
+          })
+        });
+
+        const data = await result.json();
+
+        if (!result.ok || !data.success) {
+          throw new Error(
+            data.errorCode || 'VERIFICATION_FAILED'
+          );
+        }
+
+        statusBox.textContent =
+          'IDENTITAS GOOGLE TERVERIFIKASI\n' +
+          'Email: ' + data.identity.email + '\n\n' +
+          'Verifikasi berhasil. Hak akses portal ' +
+          'belum diberikan.';
+
+      } catch (error) {
+        statusBox.textContent =
+          'Verifikasi gagal. Silakan coba kembali. (' +
+          error.message + ')';
+      }
     }
 
-    window.onload = function () {
+    function initializeGoogleLogin() {
       if (!window.google || !google.accounts) {
-        document.getElementById('status').textContent =
-          'Layanan Google Login belum berhasil dimuat. ' +
+        statusBox.textContent =
+          'Layanan Google belum berhasil dimuat. ' +
           'Silakan muat ulang halaman.';
         return;
       }
@@ -141,9 +172,11 @@
         }
       );
 
-      document.getElementById('status').textContent =
+      statusBox.textContent =
         'Silakan pilih akun Google untuk melanjutkan.';
-    };
+    }
+
+    window.addEventListener('load', initializeGoogleLogin);
   </script>
 </body>
 </html>
