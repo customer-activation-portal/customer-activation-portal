@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Customer Activation Portal</title>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 430px;
+      padding: 38px 30px;
+      text-align: center;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 35px rgba(15, 23, 42, .08);
+    }
+
+    .logo {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 20px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: #12345a;
+      color: white;
+      font-size: 25px;
+      font-weight: bold;
+    }
+
+    h1 {
+      margin: 0;
+      color: #12345a;
+      font-size: 23px;
+    }
+
+    .description {
+      margin: 13px 0 28px;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    #googleButton {
+      display: flex;
+      justify-content: center;
+      min-height: 44px;
+    }
+
+    #status {
+      margin-top: 22px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #64748b;
+    }
+
+    .footer {
+      margin-top: 32px;
+      color: #94a3b8;
+      font-size: 11px;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="login-card">
+
+    <div class="logo">CA</div>
+
+    <h1>Customer Activation Portal</h1>
+
+    <p class="description">
+      Silakan masuk menggunakan akun Google
+      yang akan didaftarkan pada portal.
+    </p>
+
+    <div id="googleButton"></div>
+
+    <div id="status">
+      Menyiapkan layanan Google Login...
+    </div>
+
+    <div class="footer">
+      Internal Application · Customer Activation Portal
+    </div>
+
+  </main>
+
+  <script>
+    const GOOGLE_CLIENT_ID =
+      '56350678879-egqgpret0id4k671hgqsb15rnc7e147a.apps.googleusercontent.com';
+
+    function handleGoogleResponse(response) {
+      document.getElementById('status').textContent =
+        'Respons Google diterima. Verifikasi keamanan di server ' +
+        'belum diaktifkan. Akses portal belum diberikan.';
+      
+      // Token tidak disimpan dan belum dikirim ke server.
+      // Verifikasi backend akan dibuat pada tahap berikutnya.
+    }
+
+    window.onload = function () {
+      if (!window.google || !google.accounts) {
+        document.getElementById('status').textContent =
+          'Layanan Google Login belum berhasil dimuat. ' +
+          'Silakan muat ulang halaman.';
+        return;
+      }
+
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleResponse
+      });
+
+      google.accounts.id.renderButton(
+        document.getElementById('googleButton'),
+        {
+          theme: 'outline',
+          size: 'large',
+          shape: 'rectangular',
+          text: 'signin_with',
+          width: 280
+        }
+      );
+
+      document.getElementById('status').textContent =
+        'Silakan pilih akun Google untuk melanjutkan.';
+    };
+  </script>
+</body>
+</html>
